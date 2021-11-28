@@ -14,8 +14,6 @@ import java.util.stream.Collectors;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
 
 @Log4j2
 @Component
@@ -31,21 +29,20 @@ public class ShippingTrackerUpdate {
     this.queueService = queueService;
   }
 
-  @Transactional(rollbackFor = Exception.class, propagation = Propagation.REQUIRES_NEW)
   @Scheduled(fixedDelay = 1, timeUnit = java.util.concurrent.TimeUnit.MINUTES)
   public void updateTrackers() throws JsonProcessingException {
     log.info("Updating trackers");
     Set<Package> allActivePackages = trackingService.getAllActivePackages();
 
     for (Package activePackage : allActivePackages) {
-      ShippingUpdateDTO lastUpdate = trackingService.getLastUpdate(activePackage.getTrackId(),
+      var lastUpdate = trackingService.getLastUpdate(activePackage.getTrackId(),
           activePackage.getTransporter());
 
       Optional<ShippingUpdate> lastSavedUpdate = activePackage.getUpdates().stream()
           .max(Comparator.comparing(ShippingUpdate::dateTime));
 
-      if (lastSavedUpdate.isPresent() && lastSavedUpdate.get().dateTime()
-          .equals(lastUpdate.dateTime())) {
+      if (lastSavedUpdate.isPresent() && lastSavedUpdate.get()
+          .equals(lastUpdate.toShippingUpdate())) {
         log.info("No new updates for package {}", activePackage.getTrackId());
         continue;
       }
