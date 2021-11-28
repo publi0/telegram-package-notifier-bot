@@ -3,7 +3,7 @@ COPY --chown=gradle:gradle . /home/src
 WORKDIR /home/src
 RUN gradle build
 
-FROM adoptopenjdk/openjdk17:alpine-slim as runner
+FROM adoptopenjdk/openjdk:17-alpine as runner
 COPY --from=builder /home/src/build/libs/*.jar /app.jar
 
 EXPOSE 9081
