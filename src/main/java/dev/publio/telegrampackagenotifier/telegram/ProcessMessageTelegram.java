@@ -16,15 +16,20 @@ import com.pengrad.telegrambot.model.request.ParseMode;
 import com.pengrad.telegrambot.model.request.ReplyKeyboardMarkup;
 import com.pengrad.telegrambot.request.SendMessage;
 import dev.publio.telegrampackagenotifier.exceptions.NoPackagesFoundException;
+import dev.publio.telegrampackagenotifier.exceptions.UserHasActionsException;
 import dev.publio.telegrampackagenotifier.exceptions.UserNotActiveException;
 import dev.publio.telegrampackagenotifier.models.Package;
 import dev.publio.telegrampackagenotifier.models.ShippingUpdate;
 import dev.publio.telegrampackagenotifier.models.User;
+import dev.publio.telegrampackagenotifier.models.enums.ActionsType;
+import dev.publio.telegrampackagenotifier.models.enums.ActionsValues;
 import dev.publio.telegrampackagenotifier.service.TrackingService;
+import dev.publio.telegrampackagenotifier.service.UserChatActionsService;
 import dev.publio.telegrampackagenotifier.service.UserService;
 import dev.publio.telegrampackagenotifier.shipping.companies.ShippingCompanies;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Component;
@@ -42,14 +47,17 @@ public class ProcessMessageTelegram {
   private final TelegramBot telegramBot;
   private final UserService userService;
   private final TrackingService trackingService;
+  private final UserChatActionsService userChatActionsService;
 
   public ProcessMessageTelegram(
       TelegramBot telegramBot,
       UserService userService,
-      TrackingService trackingService) {
+      TrackingService trackingService,
+      UserChatActionsService userChatActionsService) {
     this.telegramBot = telegramBot;
     this.userService = userService;
     this.trackingService = trackingService;
+    this.userChatActionsService = userChatActionsService;
   }
 
   public void processCallback(Update update) {
@@ -60,6 +68,8 @@ public class ProcessMessageTelegram {
     final String requestData = update.callbackQuery().data();
 
     try {
+      final var user = userService.findUser(requestChatId.toString());
+
       switch (requestMessage) {
         default:
           throw new Exception("Invalid message");
@@ -73,28 +83,23 @@ public class ProcessMessageTelegram {
           break;
         }
         case CHOOSE_TRANSPORTER: {
-          final var inlineKeyboardMarkup = new InlineKeyboardMarkup(
-              new InlineKeyboardButton("Digite o código do pacote").callbackData(
-                  "trackid:" + requestData));
-
-          messageList.add(new SendMessage(requestChatId, "yt").replyMarkup(inlineKeyboardMarkup));
-//          messageList.add(new SendMessage(requestChatId, "Digite o código do pacote:")
-//              .parseMode(ParseMode.HTML)
-//              .disableWebPagePreview(true)
-//              .disableNotification(true)
-//              .replyMarkup(new ForceReply().inputFieldPlaceholder("12341324")));
+          userChatActionsService.updateAction(user.getId(), ActionsType.NEW_PACKAGE, Map.of(
+              ActionsValues.TRANSPORTER, requestData));
+          messageList.add(
+              new SendMessage(requestChatId, "Digite o número do pacote").allowSendingWithoutReply(
+                  false));
           break;
         }
       }
     } catch (NoPackagesFoundException e) {
       log.info("No updates found");
       messageList.clear();
-      messageList.add(new SendMessage(requestChatId, "Pacote sem atualizações."));
+      messageList.add(new SendMessage(requestChatId, "Pacote sem atualizações"));
     } catch (Exception e) {
       log.error("Error processing message: " + requestMessage);
       messageList.clear();
-      messageList.add(new SendMessage(requestChatId, "Error inesperado."));
-      messageList.add(new SendMessage(requestChatId, "Tente novamente mais tarde."));
+      messageList.add(new SendMessage(requestChatId, "Error inesperado"));
+      messageList.add(new SendMessage(requestChatId, "Tente novamente mais tarde"));
     } finally {
       messageList.forEach(telegramBot::execute);
 
@@ -113,7 +118,9 @@ public class ProcessMessageTelegram {
           requestMessage.from().firstName(),
           requestMessage.from().username());
 
-      validateIfUserIsActive(messageList, requestMessage, requestChatId, requestUser);
+      validateIfUserIsActive(requestUser);
+
+      validateIfUserHasActions(requestUser);
 
       switch (requestMessage.text()) {
         default:
@@ -140,6 +147,19 @@ public class ProcessMessageTelegram {
               new SendMessage(requestChatId, CHOOSE_TRANSPORTER).replyMarkup(inlineKeyboardMarkup)
                   .parseMode(ParseMode.Markdown));
       }
+    } catch (UserHasActionsException e) {
+      final var userChatActions = e.getUserChatActions();
+      switch (userChatActions.action()) {
+        case NEW_PACKAGE -> {
+          final var companies = ShippingCompanies.valueOf(
+              userChatActions.values().get(ActionsValues.TRANSPORTER));
+          trackingService.createPackage(requestMessage.text(), companies,
+              userChatActions.userId());
+          messageList.add(new SendMessage(requestChatId, "Pacote adicionado com sucesso 🎉"));
+        }
+        default -> messageList.add(new SendMessage(requestChatId, "Opção inválida"));
+      }
+      userChatActionsService.deleteAction(userChatActions.userId());
     } catch (NoPackagesFoundException e) {
       log.error("No packages found for user: " + requestChatId);
       messageList.clear();
@@ -147,7 +167,7 @@ public class ProcessMessageTelegram {
     } catch (UserNotActiveException e) {
       log.error("User not active: " + requestChatId);
       messageList.clear();
-      messageList.add(new SendMessage(requestChatId, "Seu usuário não está ativo."));
+      messageList.add(new SendMessage(requestChatId, "❌ Infelizmente seu usuário não está ativo."));
     } catch (Exception e) {
       log.error("Error processing message: " + requestMessage.text());
       messageList.clear();
@@ -159,13 +179,16 @@ public class ProcessMessageTelegram {
     }
   }
 
-  private void validateIfUserIsActive(List<SendMessage> messageList, Message message, Long id,
-      User currentUser)
+  private void validateIfUserHasActions(User requestUser) {
+    final var action = userChatActionsService.getAction(requestUser.getId());
+    if (action.isPresent()) {
+      throw new UserHasActionsException(action.get());
+    }
+  }
+
+  private void validateIfUserIsActive(User currentUser)
       throws UserNotActiveException {
     if (!currentUser.isActive()) {
-      messageList.add(new SendMessage(id, "Olá, " + message.from().firstName()));
-      messageList.add(new SendMessage(id, "❌ Infelizmente seu usuário não está ativo."));
-      messageList.forEach(telegramBot::execute);
       throw new UserNotActiveException(currentUser.getId());
     }
   }

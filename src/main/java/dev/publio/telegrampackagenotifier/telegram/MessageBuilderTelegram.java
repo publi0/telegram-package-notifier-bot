@@ -21,7 +21,7 @@ public class MessageBuilderTelegram {
             ℹ️‎‎‎ %s
             🏢‎‎‎ %s
             """, packageInfo.getTrackId(),
-        ShippingCompanies.getShippingCompany(packageInfo.getTransporter()).getName());
+        packageInfo.getTransporter().getName());
   }
 
   public static String buildCompanyButtonText(ShippingCompanies shippingCompany) {

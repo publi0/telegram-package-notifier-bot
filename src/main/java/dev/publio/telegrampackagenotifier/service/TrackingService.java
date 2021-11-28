@@ -68,6 +68,18 @@ public class TrackingService {
 
   public Package getPackage(String trackId) {
     log.info("Searching package: " + trackId);
-    return packageRepository.findByTrackId(trackId).orElseThrow(() -> new NoPackagesFoundException(trackId));
+    return packageRepository.findByTrackId(trackId)
+        .orElseThrow(() -> new NoPackagesFoundException(trackId));
+  }
+
+  public Package createPackage(String trackId, ShippingCompanies company, String userId) {
+    log.info("Creating new package: " + trackId);
+    final var build = Package.builder()
+        .trackId(trackId)
+        .isActive(true)
+        .transporter(company)
+        .user(userId)
+        .build();
+    return savePackage(build);
   }
 }

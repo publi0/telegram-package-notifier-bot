@@ -43,10 +43,8 @@ public class ShippingTrackerUpdate {
     Set<Package> allActivePackages = trackingService.getAllActivePackages();
 
     for (Package activePackage : allActivePackages) {
-      ShippingCompanies shippingCompany = ShippingCompanies.getShippingCompany(
-          activePackage.getTransporter());
       ShippingUpdateDTO lastUpdate = trackingService.getLastUpdate(activePackage.getTrackId(),
-          shippingCompany);
+          activePackage.getTransporter());
 
       Optional<ShippingUpdate> lastSavedUpdate = activePackage.getUpdates().stream()
           .max(Comparator.comparing(ShippingUpdate::dateTime));
@@ -58,7 +56,7 @@ public class ShippingTrackerUpdate {
       if (lastSavedUpdate.isEmpty()) {
         log.info("No updates saved for package {}", activePackage.getTrackId());
         Set<ShippingUpdate> shippingUpdates = trackingService.getAllUpdates(activePackage.getTrackId(),
-                shippingCompany).stream().map(ShippingUpdateDTO::toShippingUpdate)
+                activePackage.getTransporter()).stream().map(ShippingUpdateDTO::toShippingUpdate)
             .collect(Collectors.toUnmodifiableSet());
         activePackage.setUpdates(shippingUpdates);
       }

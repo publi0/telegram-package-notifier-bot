@@ -1,23 +1,26 @@
 package dev.publio.telegrampackagenotifier.models;
 
+import dev.publio.telegrampackagenotifier.shipping.companies.ShippingCompanies;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
+import lombok.Builder;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 @Document(collection = "packages")
+@Builder
 public class Package {
 
   @Id
   private String id;
   private String trackId;
-  private String transporter;
+  private ShippingCompanies transporter;
   private String user;
   private Boolean isActive;
   private Set<ShippingUpdate> updates = new HashSet<>();
 
-  public Package(String id, String trackId, String transporter, String user,
+  public Package(String id, String trackId, ShippingCompanies transporter, String user,
       Boolean isActive, Set<ShippingUpdate> updates) {
     this.id = id;
     this.trackId = trackId;
@@ -27,7 +30,7 @@ public class Package {
     this.updates = updates;
   }
 
-  public Package(String trackId, String transporter, String user, Boolean isActive,
+  public Package(String trackId, ShippingCompanies transporter, String user, Boolean isActive,
       Set<ShippingUpdate> updates) {
     this.trackId = trackId;
     this.transporter = transporter;
@@ -43,7 +46,7 @@ public class Package {
     return trackId;
   }
 
-  public String getTransporter() {
+  public ShippingCompanies getTransporter() {
     return transporter;
   }
 
@@ -72,7 +75,7 @@ public class Package {
     this.trackId = trackId;
   }
 
-  public void setTransporter(String transporter) {
+  public void setTransporter(ShippingCompanies transporter) {
     this.transporter = transporter;
   }
 
