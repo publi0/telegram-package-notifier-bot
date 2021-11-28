@@ -37,10 +37,10 @@ public class ShippingTrackerUpdate {
     for (Package activePackage : allActivePackages) {
       var lastUpdate = trackingService.getLastUpdate(activePackage.getTrackId(),
           activePackage.getTransporter());
-
+    log.info("Last update: {}", lastUpdate);
       Optional<ShippingUpdate> lastSavedUpdate = activePackage.getUpdates().stream()
           .max(Comparator.comparing(ShippingUpdate::dateTime));
-
+      log.info("Last saved update: {}", lastSavedUpdate);
       if (lastSavedUpdate.isPresent() && lastSavedUpdate.get()
           .equals(lastUpdate.toShippingUpdate())) {
         log.info("No new updates for package {}", activePackage.getTrackId());
@@ -54,10 +54,10 @@ public class ShippingTrackerUpdate {
             .collect(Collectors.toUnmodifiableSet());
         activePackage.setUpdates(shippingUpdates);
       } else {
+        log.info("New updates for package {}", activePackage.getTrackId());
         activePackage.getUpdates().add(lastUpdate.toShippingUpdate());
       }
 
-      log.info("New updates for package {}", activePackage.getTrackId());
       Package savedPackage = trackingService.savePackage(activePackage);
       log.info("Saved update for package {}", savedPackage.getTrackId());
       QueueTelegramMessage queueTelegramMessage = new QueueTelegramMessage(
