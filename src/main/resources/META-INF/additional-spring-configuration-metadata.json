@@ -1,0 +1,19 @@
+{
+  "properties": [
+    {
+      "name": "telegram.bot.token",
+      "type": "java.lang.String",
+      "description": "Telegram bot token."
+    },
+    {
+      "name": "queue.name",
+      "type": "java.lang.String",
+      "description": "Rabbit MQ queue name for new package updates."
+    },
+    {
+      "name": "auth0.audience",
+      "type": "java.lang.String",
+      "description": "Auth0 audience for validating JWT tokens."
+    }
+  ]
+}

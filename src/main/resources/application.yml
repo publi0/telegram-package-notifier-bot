@@ -1,0 +1,28 @@
+transporter:
+  urls:
+    direct_log: https://corporativo.directlog.com.br/track_individual/index.asp?fase=&tipo=0&numtracking=%s
+
+spring:
+  rabbitmq:
+    addresses: ${RABBIT_URL}
+  data:
+    mongodb:
+      uri: ${MONGO_URL}
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: ${ISSUER_URL}
+
+auth0:
+  audience: ${AUDIENCE_URL}
+
+queue:
+  name: telegram-notification
+
+telegram:
+  bot:
+    token: ${TELEGRAM_BOT_TOKEN}
+
+server:
+  port: 8080
