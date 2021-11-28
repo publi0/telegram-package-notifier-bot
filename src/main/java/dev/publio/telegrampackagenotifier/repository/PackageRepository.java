@@ -11,6 +11,8 @@ public interface PackageRepository extends Repository<Package, String> {
 
   Optional<Package> findByTrackId(String trackId);
 
+  Optional<Package> findByTrackIdAndUser(String trackId, String user);
+
   Package save(Package item);
 
   Set<Package> findAllByIsActiveTrueAndUser(String user);

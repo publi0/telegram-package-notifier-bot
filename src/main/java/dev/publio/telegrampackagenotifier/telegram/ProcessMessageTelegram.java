@@ -73,7 +73,7 @@ public class ProcessMessageTelegram {
         default:
           throw new Exception("Invalid message");
         case YOUR_PACKAGES: {
-          trackingService.getPackage(requestData)
+          trackingService.getPackageByTrackIdAndUserId(requestData, user.getId())
               .getUpdates().stream().sorted(Comparator.comparing(ShippingUpdate::dateTime))
               .forEachOrdered(shippingUpdate -> messageList.add(
                   new SendMessage(requestChatId,

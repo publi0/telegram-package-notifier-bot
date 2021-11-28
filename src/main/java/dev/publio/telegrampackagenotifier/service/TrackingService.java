@@ -72,6 +72,12 @@ public class TrackingService {
         .orElseThrow(() -> new NoPackagesFoundException(trackId));
   }
 
+  public Package getPackageByTrackIdAndUserId(String trackId, String userId) {
+    log.info("Searching package: " + trackId);
+    return packageRepository.findByTrackIdAndUser(trackId, userId)
+        .orElseThrow(() -> new NoPackagesFoundException(trackId));
+  }
+
   public Package createPackage(String trackId, ShippingCompanies company, String userId) {
     log.info("Creating new package: " + trackId);
     final var build = Package.builder()
