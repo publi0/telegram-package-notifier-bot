@@ -31,9 +31,21 @@ public class UserService {
     });
   }
 
-  public User findUser(String chatId) {
+  public User findUserByChatId(String chatId) {
     log.info("Get user? chatId: {}", chatId);
     return userRepository.findByChatId(chatId)
+        .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+  }
+
+  public User findUserByUsername(String username) {
+    log.info("Get user? username: {}", username);
+    return userRepository.findByUsername(username)
+        .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+  }
+
+  public User findUserById(String id) {
+    log.info("Get user id: {}", id);
+    return userRepository.findById(id.toString())
         .orElseThrow(() -> new UsernameNotFoundException("User not found"));
   }
 }

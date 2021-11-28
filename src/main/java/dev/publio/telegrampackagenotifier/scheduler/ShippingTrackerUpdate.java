@@ -7,8 +7,6 @@ import dev.publio.telegrampackagenotifier.models.Package;
 import dev.publio.telegrampackagenotifier.models.ShippingUpdate;
 import dev.publio.telegrampackagenotifier.service.QueueService;
 import dev.publio.telegrampackagenotifier.service.TrackingService;
-import dev.publio.telegrampackagenotifier.shipping.companies.ShippingCompanies;
-import dev.publio.telegrampackagenotifier.telegram.ListenerTelegram;
 import java.util.Comparator;
 import java.util.Optional;
 import java.util.Set;
@@ -25,15 +23,12 @@ public class ShippingTrackerUpdate {
 
   private final TrackingService trackingService;
   private final QueueService queueService;
-  private final ListenerTelegram listenerTelegram;
 
   public ShippingTrackerUpdate(
       TrackingService trackingService,
-      QueueService queueService,
-      ListenerTelegram listenerTelegram) {
+      QueueService queueService) {
     this.trackingService = trackingService;
     this.queueService = queueService;
-    this.listenerTelegram = listenerTelegram;
   }
 
   @Transactional(rollbackFor = Exception.class, propagation = Propagation.REQUIRES_NEW)
@@ -49,22 +44,27 @@ public class ShippingTrackerUpdate {
       Optional<ShippingUpdate> lastSavedUpdate = activePackage.getUpdates().stream()
           .max(Comparator.comparing(ShippingUpdate::dateTime));
 
-      if (lastSavedUpdate.isPresent() && lastSavedUpdate.get().dateTime().equals(lastUpdate.dateTime())) {
-          log.info("No new updates for package {}", activePackage.getTrackId());
-          continue;
+      if (lastSavedUpdate.isPresent() && lastSavedUpdate.get().dateTime()
+          .equals(lastUpdate.dateTime())) {
+        log.info("No new updates for package {}", activePackage.getTrackId());
+        continue;
       }
       if (lastSavedUpdate.isEmpty()) {
         log.info("No updates saved for package {}", activePackage.getTrackId());
-        Set<ShippingUpdate> shippingUpdates = trackingService.getAllUpdates(activePackage.getTrackId(),
+        Set<ShippingUpdate> shippingUpdates = trackingService.getAllUpdates(
+                activePackage.getTrackId(),
                 activePackage.getTransporter()).stream().map(ShippingUpdateDTO::toShippingUpdate)
             .collect(Collectors.toUnmodifiableSet());
         activePackage.setUpdates(shippingUpdates);
+      } else {
+        activePackage.getUpdates().add(lastUpdate.toShippingUpdate());
       }
 
       log.info("New updates for package {}", activePackage.getTrackId());
       Package savedPackage = trackingService.savePackage(activePackage);
       log.info("Saved update for package {}", savedPackage.getTrackId());
-      QueueTelegramMessage queueTelegramMessage = new QueueTelegramMessage(savedPackage.getTrackId(), lastUpdate);
+      QueueTelegramMessage queueTelegramMessage = new QueueTelegramMessage(
+          savedPackage.getTrackId(),activePackage.getUser(),  lastUpdate);
       queueService.sendToTelegramNotification(queueTelegramMessage);
     }
 

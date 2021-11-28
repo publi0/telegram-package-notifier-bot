@@ -18,8 +18,9 @@ public class MessageBuilderTelegram {
 
   public static String buildPackageInfoMessage(Package packageInfo) {
     return String.format("""
-            ℹ️‎‎‎ %s
-            🏢‎‎‎ %s
+            ℹ️ %s
+                        
+            🏢 %s
             """, packageInfo.getTrackId(),
         packageInfo.getTransporter().getName());
   }

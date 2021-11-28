@@ -6,8 +6,6 @@ import static dev.publio.telegrampackagenotifier.telegram.MessageBuilderTelegram
 
 import com.pengrad.telegrambot.TelegramBot;
 import com.pengrad.telegrambot.model.Message;
-import com.pengrad.telegrambot.model.MessageEntity;
-import com.pengrad.telegrambot.model.MessageEntity.Type;
 import com.pengrad.telegrambot.model.Update;
 import com.pengrad.telegrambot.model.request.InlineKeyboardButton;
 import com.pengrad.telegrambot.model.request.InlineKeyboardMarkup;
@@ -68,7 +66,7 @@ public class ProcessMessageTelegram {
     final String requestData = update.callbackQuery().data();
 
     try {
-      final var user = userService.findUser(requestChatId.toString());
+      final var user = userService.findUserByChatId(requestChatId.toString());
 
       switch (requestMessage) {
         default:
@@ -208,7 +206,6 @@ public class ProcessMessageTelegram {
               aPackage.getTrackId()));
     }
     messageList.add(new SendMessage(id, YOUR_PACKAGES).replyMarkup(inlineKeyboardMarkup)
-        .entities(new MessageEntity(
-            Type.bold, 0, 255)).parseMode(ParseMode.Markdown));
+        .parseMode(ParseMode.MarkdownV2));
   }
 }

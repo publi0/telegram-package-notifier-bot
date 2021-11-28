@@ -1,8 +1,8 @@
 package dev.publio.telegrampackagenotifier.controller;
 
+import dev.publio.telegrampackagenotifier.dto.ShippingUpdateDTO;
 import dev.publio.telegrampackagenotifier.service.TrackingService;
 import dev.publio.telegrampackagenotifier.shipping.companies.ShippingCompanies;
-import dev.publio.telegrampackagenotifier.dto.ShippingUpdateDTO;
 import java.util.Set;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.http.ResponseEntity;

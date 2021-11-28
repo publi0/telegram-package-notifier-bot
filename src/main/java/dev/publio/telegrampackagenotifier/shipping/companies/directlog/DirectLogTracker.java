@@ -1,9 +1,9 @@
 package dev.publio.telegrampackagenotifier.shipping.companies.directlog;
 
+import dev.publio.telegrampackagenotifier.dto.ShippingUpdateDTO;
 import dev.publio.telegrampackagenotifier.exceptions.UnableToGetShippingUpdateException;
 import dev.publio.telegrampackagenotifier.shipping.companies.ShippingCompanies;
 import dev.publio.telegrampackagenotifier.shipping.factory.ShippingCompany;
-import dev.publio.telegrampackagenotifier.dto.ShippingUpdateDTO;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
