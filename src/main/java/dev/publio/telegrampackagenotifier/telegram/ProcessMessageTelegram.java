@@ -6,8 +6,6 @@ import static dev.publio.telegrampackagenotifier.telegram.MessageBuilderTelegram
 
 import com.pengrad.telegrambot.TelegramBot;
 import com.pengrad.telegrambot.model.Message;
-import com.pengrad.telegrambot.model.MessageEntity;
-import com.pengrad.telegrambot.model.MessageEntity.Type;
 import com.pengrad.telegrambot.model.Update;
 import com.pengrad.telegrambot.model.request.InlineKeyboardButton;
 import com.pengrad.telegrambot.model.request.InlineKeyboardMarkup;
@@ -28,6 +26,7 @@ import dev.publio.telegrampackagenotifier.service.UserChatActionsService;
 import dev.publio.telegrampackagenotifier.service.UserService;
 import dev.publio.telegrampackagenotifier.shipping.companies.ShippingCompanies;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -74,12 +73,13 @@ public class ProcessMessageTelegram {
         default:
           throw new Exception("Invalid message");
         case YOUR_PACKAGES: {
-          Set<ShippingUpdate> updates = trackingService.getPackage(requestData)
-              .getUpdates();
-          updates.forEach(shippingUpdate -> messageList.add(
-              new SendMessage(requestChatId, buildTrackingUpdateMessage(shippingUpdate)).parseMode(
-                  ParseMode.Markdown))
-          );
+          trackingService.getPackage(requestData)
+              .getUpdates().stream().sorted(Comparator.comparing(ShippingUpdate::dateTime))
+              .forEachOrdered(shippingUpdate -> messageList.add(
+                  new SendMessage(requestChatId,
+                      buildTrackingUpdateMessage(shippingUpdate)).parseMode(
+                      ParseMode.Markdown))
+              );
           break;
         }
         case CHOOSE_TRANSPORTER: {
