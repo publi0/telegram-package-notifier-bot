@@ -6,6 +6,8 @@ import static dev.publio.telegrampackagenotifier.telegram.MessageBuilderTelegram
 
 import com.pengrad.telegrambot.TelegramBot;
 import com.pengrad.telegrambot.model.Message;
+import com.pengrad.telegrambot.model.MessageEntity;
+import com.pengrad.telegrambot.model.MessageEntity.Type;
 import com.pengrad.telegrambot.model.Update;
 import com.pengrad.telegrambot.model.request.InlineKeyboardButton;
 import com.pengrad.telegrambot.model.request.InlineKeyboardMarkup;
@@ -202,10 +204,9 @@ public class ProcessMessageTelegram {
 
     for (Package aPackage : allActivePackagesByUser) {
       inlineKeyboardMarkup.addRow(
-          new InlineKeyboardButton(buildPackageInfoMessage(aPackage)).callbackData(
-              aPackage.getTrackId()));
+          new InlineKeyboardButton(buildPackageInfoMessage(aPackage))
+              .callbackData(aPackage.getTrackId())).inlineKeyboard();
     }
-    messageList.add(new SendMessage(id, YOUR_PACKAGES).replyMarkup(inlineKeyboardMarkup)
-        .parseMode(ParseMode.MarkdownV2));
+    messageList.add(new SendMessage(id, YOUR_PACKAGES).replyMarkup(inlineKeyboardMarkup));
   }
 }
