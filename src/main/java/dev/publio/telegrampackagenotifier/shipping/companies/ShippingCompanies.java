@@ -5,10 +5,9 @@ import java.util.Locale;
 
 public enum ShippingCompanies {
 
-  CORREIOS("Correios"),
   DIRECT("Direct log");
 
-  private String name;
+  private final String name;
 
   ShippingCompanies(String name) {
     this.name = name;

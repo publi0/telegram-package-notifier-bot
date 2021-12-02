@@ -3,7 +3,7 @@ package dev.publio.telegrampackagenotifier.shipping.companies.directlog;
 import dev.publio.telegrampackagenotifier.dto.ShippingUpdateDTO;
 import dev.publio.telegrampackagenotifier.exceptions.UnableToGetShippingUpdateException;
 import dev.publio.telegrampackagenotifier.shipping.companies.ShippingCompanies;
-import dev.publio.telegrampackagenotifier.shipping.factory.ShippingCompany;
+import dev.publio.telegrampackagenotifier.shipping.factory.ShippingCompanyTracker;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -20,7 +20,7 @@ import org.springframework.stereotype.Component;
 
 @Log4j2
 @Component
-public class DirectLogTracker implements ShippingCompany {
+public class DirectLogTracker implements ShippingCompanyTracker {
 
   public static final int DATE_INDEX = 0;
   public static final int HOUR_INDEX = 1;

@@ -10,18 +10,18 @@ import org.springframework.stereotype.Component;
 @Component
 public class ShippingCompanyFactory {
 
-  private Map<ShippingCompanies, ShippingCompany> companies;
+  private Map<ShippingCompanies, ShippingCompanyTracker> companies;
 
   @Autowired
-  public ShippingCompanyFactory(Set<ShippingCompany> strategySet) {
+  public ShippingCompanyFactory(Set<ShippingCompanyTracker> strategySet) {
     createStrategy(strategySet);
   }
 
-  public ShippingCompany findCompany(ShippingCompanies company) {
+  public ShippingCompanyTracker findCompany(ShippingCompanies company) {
     return companies.get(company);
   }
 
-  private void createStrategy(Set<ShippingCompany> strategySet) {
+  private void createStrategy(Set<ShippingCompanyTracker> strategySet) {
     companies = new HashMap<>();
     strategySet.forEach(strategy -> companies.put(strategy.getCompanyName(), strategy));
   }

@@ -3,6 +3,7 @@ package dev.publio.telegrampackagenotifier.scheduler;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import dev.publio.telegrampackagenotifier.dto.QueueTelegramMessage;
 import dev.publio.telegrampackagenotifier.dto.ShippingUpdateDTO;
+import dev.publio.telegrampackagenotifier.exceptions.NoUpdatesFoundException;
 import dev.publio.telegrampackagenotifier.models.Package;
 import dev.publio.telegrampackagenotifier.models.ShippingUpdate;
 import dev.publio.telegrampackagenotifier.service.QueueService;
@@ -36,8 +37,14 @@ public class ShippingTrackerUpdate {
     Set<Package> allActivePackages = trackingService.getAllActivePackages();
 
     for (Package activePackage : allActivePackages) {
-      var lastUpdate = trackingService.getLastUpdate(activePackage.getTrackId(),
-          activePackage.getTransporter());
+      ShippingUpdateDTO lastUpdate;
+      try {
+        lastUpdate = trackingService.getLastUpdate(activePackage.getTrackId(),
+            activePackage.getTransporter());
+      } catch (NoUpdatesFoundException e) {
+        log.error("No updates found for package id {}", activePackage.getId());
+        continue;
+      }
       log.info("Last update: {}", lastUpdate);
       Optional<ShippingUpdate> lastSavedUpdate = activePackage.getUpdates().stream()
           .max(Comparator.comparing(ShippingUpdate::dateTime));
