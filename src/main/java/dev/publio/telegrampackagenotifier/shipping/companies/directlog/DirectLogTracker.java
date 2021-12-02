@@ -42,8 +42,12 @@ public class DirectLogTracker implements ShippingCompany {
     try {
       String urlWithTrackId = mountUrlWithTrackId(trackId);
 
-      log.info("Searching direclog domain");
-      Document doc = Jsoup.connect(urlWithTrackId).get();
+      log.info("Searching direct log domain");
+      Document doc = Jsoup.connect(urlWithTrackId)
+          .followRedirects(true)
+          .timeout(10000)
+          .execute()
+          .parse();
 
       log.info("Parsing to our domain object");
       Set<DirectTrackDTO> trackUpdates = getTrackUpdates(doc);

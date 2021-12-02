@@ -85,7 +85,7 @@ public class ProcessMessageTelegram {
           }
           if (requestData.startsWith(DELETE)) {
             log.info("User wants to delete package");
-            activePackage.setActive(false);
+            activePackage.setIsActive(false);
             trackingService.savePackage(activePackage);
             messageList.add(
                 new SendMessage(requestChatId, "Pacote removido com sucesso!"));
@@ -215,11 +215,11 @@ public class ProcessMessageTelegram {
       inlineKeyboardMarkup.addRow(
           new InlineKeyboardButton("View")
               .callbackData(VIEW + activePackage.getId()),
-          new InlineKeyboardButton("Delete")
+          new InlineKeyboardButton("Apagar")
               .callbackData(DELETE + activePackage.getId())
       );
       messageList.add(new SendMessage(id, buildPackageInfoMessage(activePackage))
-          .replyMarkup(inlineKeyboardMarkup));
+          .replyMarkup(inlineKeyboardMarkup).parseMode(ParseMode.MarkdownV2));
     }
   }
 }

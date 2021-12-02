@@ -7,6 +7,7 @@ import dev.publio.telegrampackagenotifier.models.Package;
 import dev.publio.telegrampackagenotifier.models.ShippingUpdate;
 import dev.publio.telegrampackagenotifier.service.QueueService;
 import dev.publio.telegrampackagenotifier.service.TrackingService;
+import java.time.LocalDateTime;
 import java.util.Comparator;
 import java.util.Optional;
 import java.util.Set;
@@ -37,16 +38,14 @@ public class ShippingTrackerUpdate {
     for (Package activePackage : allActivePackages) {
       var lastUpdate = trackingService.getLastUpdate(activePackage.getTrackId(),
           activePackage.getTransporter());
-    log.info("Last update: {}", lastUpdate);
+      log.info("Last update: {}", lastUpdate);
       Optional<ShippingUpdate> lastSavedUpdate = activePackage.getUpdates().stream()
           .max(Comparator.comparing(ShippingUpdate::dateTime));
       log.info("Last saved update: {}", lastSavedUpdate);
       if (lastSavedUpdate.isPresent() && lastSavedUpdate.get()
           .equals(lastUpdate.toShippingUpdate())) {
         log.info("No new updates for package {}", activePackage.getTrackId());
-        continue;
-      }
-      if (lastSavedUpdate.isEmpty()) {
+      } else if (lastSavedUpdate.isEmpty()) {
         log.info("No updates saved for package {}", activePackage.getTrackId());
         Set<ShippingUpdate> shippingUpdates = trackingService.getAllUpdates(
                 activePackage.getTrackId(),
@@ -56,15 +55,13 @@ public class ShippingTrackerUpdate {
       } else {
         log.info("New updates for package {}", activePackage.getTrackId());
         activePackage.getUpdates().add(lastUpdate.toShippingUpdate());
+        queueService.sendToTelegramNotification(new QueueTelegramMessage(
+            activePackage.getTrackId(), activePackage.getUser(), lastUpdate));
       }
-
+      activePackage.setLastUpdate(LocalDateTime.now());
       Package savedPackage = trackingService.savePackage(activePackage);
       log.info("Saved update for package {}", savedPackage.getTrackId());
-      QueueTelegramMessage queueTelegramMessage = new QueueTelegramMessage(
-          savedPackage.getTrackId(),activePackage.getUser(),  lastUpdate);
-      queueService.sendToTelegramNotification(queueTelegramMessage);
     }
-
     log.info("Finished updating trackers");
   }
 }

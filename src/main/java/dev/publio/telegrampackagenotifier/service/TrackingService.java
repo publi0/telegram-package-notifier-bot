@@ -80,12 +80,11 @@ public class TrackingService {
 
   public Package createPackage(String trackId, ShippingCompanies company, String userId) {
     log.info("Creating new package: " + trackId);
-    final var build = Package.builder()
-        .trackId(trackId)
-        .isActive(true)
-        .transporter(company)
-        .user(userId)
-        .build();
-    return savePackage(build);
+    final var newPackage = new Package();
+    newPackage.setTrackId(trackId);
+    newPackage.setIsActive(true);
+    newPackage.setTransporter(company);
+    newPackage.setUser(userId);
+    return savePackage(newPackage);
   }
 }

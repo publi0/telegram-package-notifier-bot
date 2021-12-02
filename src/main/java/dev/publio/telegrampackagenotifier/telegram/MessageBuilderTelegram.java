@@ -18,11 +18,13 @@ public class MessageBuilderTelegram {
 
   public static String buildPackageInfoMessage(Package packageInfo) {
     return String.format("""
-                        
-            ℹ️ %s
+            ℹ️ *%s*
             👷 %s
+            _Ultima atualização: %s_
             """, packageInfo.getTrackId(),
-        packageInfo.getTransporter().getName());
+        packageInfo.getTransporter().getName(),
+        packageInfo.getLastUpdate() == null ? "Aguardando atualizações" :
+            packageInfo.getLastUpdate().format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm")));
   }
 
   public static String buildCompanyButtonText(ShippingCompanies shippingCompany) {
