@@ -40,8 +40,9 @@ public class ProcessMessageTelegram {
   public static final String MY_PACKAGES = "📦 Meus pacotes";
   public static final String ADD_PACKAGE = "🆕 Adicionar pacote";
   public static final String START = "/start";
-  public static final String YOUR_PACKAGES = "⬇️⬇️⬇️⬇️ Pacotes ⬇️⬇️⬇️⬇️";
   public static final String CHOOSE_TRANSPORTER = "Selecione a transportadora:";
+  public static final String VIEW = "V";
+  public static final String DELETE = "D";
 
   private final TelegramBot telegramBot;
   private final UserService userService;
@@ -70,24 +71,32 @@ public class ProcessMessageTelegram {
       final var user = userService.findUserByChatId(requestChatId.toString());
 
       switch (requestMessage) {
-        default:
-          throw new Exception("Invalid message");
-        case YOUR_PACKAGES: {
-          trackingService.getPackageByTrackIdAndUserId(requestData, user.getId())
-              .getUpdates().stream().sorted(Comparator.comparing(ShippingUpdate::dateTime))
-              .forEachOrdered(shippingUpdate -> messageList.add(
-                  new SendMessage(requestChatId,
-                      buildTrackingUpdateMessage(shippingUpdate)).parseMode(
-                      ParseMode.Markdown))
-              );
-          break;
+        default: {
+          final var packageId = requestData.stripLeading().substring(1);
+          final var activePackage = trackingService.getPackageByIdAndUser(packageId, user.getId());
+          if (requestData.startsWith(VIEW)) {
+            log.info("User wants to view package");
+            activePackage
+                .getUpdates().stream().sorted(Comparator.comparing(ShippingUpdate::dateTime))
+                .forEachOrdered(shippingUpdate -> messageList.add(
+                    new SendMessage(requestChatId, buildTrackingUpdateMessage(shippingUpdate)))
+                );
+            break;
+          }
+          if (requestData.startsWith(DELETE)) {
+            log.info("User wants to delete package");
+            activePackage.setActive(false);
+            trackingService.savePackage(activePackage);
+            messageList.add(
+                new SendMessage(requestChatId, "Pacote removido com sucesso!"));
+            break;
+          }
         }
         case CHOOSE_TRANSPORTER: {
           userChatActionsService.updateAction(user.getId(), ActionsType.NEW_PACKAGE, Map.of(
               ActionsValues.TRANSPORTER, requestData));
           messageList.add(
-              new SendMessage(requestChatId, "Digite o número do pacote").allowSendingWithoutReply(
-                  false));
+              new SendMessage(requestChatId, "Digite o número do pacote:"));
           break;
         }
       }
@@ -140,8 +149,8 @@ public class ProcessMessageTelegram {
           final var inlineKeyboardMarkup = new InlineKeyboardMarkup();
           for (ShippingCompanies shippingCompany : ShippingCompanies.values()) {
             inlineKeyboardMarkup.addRow(
-                new InlineKeyboardButton(buildCompanyButtonText(shippingCompany)).callbackData(
-                    shippingCompany.toString()));
+                new InlineKeyboardButton(buildCompanyButtonText(shippingCompany))
+                    .callbackData(shippingCompany.toString()));
           }
           messageList.add(
               new SendMessage(requestChatId, CHOOSE_TRANSPORTER).replyMarkup(inlineKeyboardMarkup)
@@ -197,16 +206,20 @@ public class ProcessMessageTelegram {
       throws NoPackagesFoundException {
     Set<Package> allActivePackagesByUser = trackingService.getAllActivePackagesByUser(
         currentUser.getId());
-    InlineKeyboardMarkup inlineKeyboardMarkup = new InlineKeyboardMarkup();
     if (allActivePackagesByUser.isEmpty()) {
       throw new NoPackagesFoundException(currentUser.getId());
     }
 
-    for (Package aPackage : allActivePackagesByUser) {
+    for (Package activePackage : allActivePackagesByUser) {
+      InlineKeyboardMarkup inlineKeyboardMarkup = new InlineKeyboardMarkup();
       inlineKeyboardMarkup.addRow(
-          new InlineKeyboardButton(buildPackageInfoMessage(aPackage))
-              .callbackData(aPackage.getTrackId())).inlineKeyboard();
+          new InlineKeyboardButton("View")
+              .callbackData(VIEW + activePackage.getId()),
+          new InlineKeyboardButton("Delete")
+              .callbackData(DELETE + activePackage.getId())
+      );
+      messageList.add(new SendMessage(id, buildPackageInfoMessage(activePackage))
+          .replyMarkup(inlineKeyboardMarkup));
     }
-    messageList.add(new SendMessage(id, YOUR_PACKAGES).replyMarkup(inlineKeyboardMarkup));
   }
 }

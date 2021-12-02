@@ -29,7 +29,7 @@ public class ShippingTrackerUpdate {
     this.queueService = queueService;
   }
 
-  @Scheduled(fixedDelay = 1, timeUnit = java.util.concurrent.TimeUnit.MINUTES)
+  @Scheduled(fixedDelay = 5, timeUnit = java.util.concurrent.TimeUnit.MINUTES)
   public void updateTrackers() throws JsonProcessingException {
     log.info("Updating trackers");
     Set<Package> allActivePackages = trackingService.getAllActivePackages();

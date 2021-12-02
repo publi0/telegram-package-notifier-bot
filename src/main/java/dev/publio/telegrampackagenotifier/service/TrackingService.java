@@ -66,9 +66,9 @@ public class TrackingService {
     return packages;
   }
 
-  public Package getPackage(String trackId) {
+  public Package getPackageByIdAndUser(String trackId, String userId) {
     log.info("Searching package: " + trackId);
-    return packageRepository.findByTrackId(trackId)
+    return packageRepository.findByIdAndUser(trackId, userId)
         .orElseThrow(() -> new NoPackagesFoundException(trackId));
   }
 

@@ -16,4 +16,6 @@ public interface PackageRepository extends Repository<Package, String> {
   Package save(Package item);
 
   Set<Package> findAllByIsActiveTrueAndUser(String user);
+
+  Optional<Package> findByIdAndUser(String id, String userId);
 }
