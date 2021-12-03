@@ -1,6 +1,7 @@
 transporter:
   urls:
-    direct_log: https://corporativo.directlog.com.br/track_individual/index.asp?fase=&tipo=0&numtracking=%s
+    direct_log: https://corporativo.directlog.com.br/track_individual/index.asp?numtracking=%s
+    correios: https://www.linkcorreios.com.br/?id=%s
 
 spring:
   rabbitmq:

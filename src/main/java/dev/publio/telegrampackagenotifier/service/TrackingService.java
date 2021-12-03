@@ -9,6 +9,7 @@ import dev.publio.telegrampackagenotifier.shipping.companies.ShippingCompanies;
 import dev.publio.telegrampackagenotifier.shipping.factory.ShippingCompanyFactory;
 import java.util.Comparator;
 import java.util.Set;
+import java.util.stream.Collectors;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Service;
 
@@ -80,11 +81,16 @@ public class TrackingService {
 
   public Package createPackage(String trackId, ShippingCompanies company, String userId) {
     log.info("Creating new package: " + trackId);
+    final var allUpdates = getAllUpdates(trackId, company).stream()
+        .map(ShippingUpdateDTO::toShippingUpdate).collect(
+            Collectors.toSet());
+
     final var newPackage = new Package();
     newPackage.setTrackId(trackId);
     newPackage.setIsActive(true);
     newPackage.setTransporter(company);
     newPackage.setUser(userId);
+    newPackage.setUpdates(allUpdates);
     return savePackage(newPackage);
   }
 }

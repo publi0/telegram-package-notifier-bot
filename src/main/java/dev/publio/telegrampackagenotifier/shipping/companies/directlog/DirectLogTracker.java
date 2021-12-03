@@ -4,7 +4,6 @@ import dev.publio.telegrampackagenotifier.dto.ShippingUpdateDTO;
 import dev.publio.telegrampackagenotifier.exceptions.UnableToGetShippingUpdateException;
 import dev.publio.telegrampackagenotifier.shipping.companies.ShippingCompanies;
 import dev.publio.telegrampackagenotifier.shipping.factory.ShippingCompanyTracker;
-import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -38,11 +37,9 @@ public class DirectLogTracker implements ShippingCompanyTracker {
 
   @Override
   public Set<ShippingUpdateDTO> getShippingUpdate(String trackId) {
-    log.info("Get shipping information for track id [{}]", trackId);
+    log.info("Get direc log shipping information for track id [{}]", trackId);
     try {
       String urlWithTrackId = mountUrlWithTrackId(trackId);
-
-      log.info("Searching direct log domain");
       Document doc = Jsoup.connect(urlWithTrackId)
           .followRedirects(true)
           .timeout(10000)
@@ -63,7 +60,8 @@ public class DirectLogTracker implements ShippingCompanyTracker {
               x.operation(), ShippingCompanies.DIRECT)).collect(
           Collectors.toUnmodifiableSet());
 
-    } catch (IOException e) {
+    } catch (Exception e) {
+      log.error("Unable to get shipping information for track id [{}]", trackId, e);
       throw new UnableToGetShippingUpdateException(e.getMessage());
     }
   }

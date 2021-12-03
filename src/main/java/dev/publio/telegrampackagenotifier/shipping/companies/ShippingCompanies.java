@@ -5,7 +5,8 @@ import java.util.Locale;
 
 public enum ShippingCompanies {
 
-  DIRECT("Direct log");
+  DIRECT("Direct log"),
+  CORREIOS("Correios");
 
   private final String name;
 

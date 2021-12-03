@@ -1,8 +1,8 @@
 package dev.publio.telegrampackagenotifier.service;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.publio.telegrampackagenotifier.dto.QueueTelegramMessage;
+import lombok.SneakyThrows;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.amqp.core.Queue;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
@@ -23,8 +23,8 @@ public class QueueService {
     this.telegramQueue = telegramQueue;
   }
 
-  public void sendToTelegramNotification(QueueTelegramMessage message)
-      throws JsonProcessingException {
+  @SneakyThrows
+  public void sendToTelegramNotification(QueueTelegramMessage message) {
     log.info("Sending message [{}] to queue: {}", message, telegramQueue.getName());
     String valueAsString = mapper.writeValueAsString(message);
     template.convertAndSend(telegramQueue.getName(), valueAsString);

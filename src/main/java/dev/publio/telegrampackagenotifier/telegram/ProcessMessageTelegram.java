@@ -28,6 +28,7 @@ import dev.publio.telegrampackagenotifier.shipping.companies.ShippingCompanies;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import lombok.extern.log4j.Log4j2;
@@ -74,7 +75,13 @@ public class ProcessMessageTelegram {
         default: {
           final var packageId = requestData.stripLeading().substring(1);
           final var activePackage = trackingService.getPackageByIdAndUser(packageId, user.getId());
+
           if (requestData.startsWith(VIEW)) {
+            if (activePackage.getUpdates().isEmpty()) {
+              log.info("No updates found for package {}", packageId);
+              messageList.add(
+                  new SendMessage(requestChatId, "Não há atualizações para este pacote."));
+            }
             log.info("User wants to view package");
             activePackage
                 .getUpdates().stream().sorted(Comparator.comparing(ShippingUpdate::dateTime))
@@ -162,7 +169,7 @@ public class ProcessMessageTelegram {
         case NEW_PACKAGE -> {
           final var companies = ShippingCompanies.valueOf(
               userChatActions.values().get(ActionsValues.TRANSPORTER));
-          trackingService.createPackage(requestMessage.text(), companies,
+          trackingService.createPackage(requestMessage.text().toUpperCase(Locale.ROOT), companies,
               userChatActions.userId());
           messageList.add(new SendMessage(requestChatId, "Pacote adicionado com sucesso 🎉"));
         }

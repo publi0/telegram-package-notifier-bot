@@ -1,6 +1,5 @@
 package dev.publio.telegrampackagenotifier.scheduler;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import dev.publio.telegrampackagenotifier.dto.QueueTelegramMessage;
 import dev.publio.telegrampackagenotifier.dto.ShippingUpdateDTO;
 import dev.publio.telegrampackagenotifier.exceptions.NoUpdatesFoundException;
@@ -32,7 +31,7 @@ public class ShippingTrackerUpdate {
   }
 
   @Scheduled(fixedDelay = 5, timeUnit = java.util.concurrent.TimeUnit.MINUTES)
-  public void updateTrackers() throws JsonProcessingException {
+  public void updateTrackers() {
     log.info("Updating trackers");
     Set<Package> allActivePackages = trackingService.getAllActivePackages();
 
