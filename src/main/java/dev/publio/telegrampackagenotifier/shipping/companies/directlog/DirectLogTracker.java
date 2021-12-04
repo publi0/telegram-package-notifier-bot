@@ -55,11 +55,12 @@ public class DirectLogTracker implements ShippingCompanyTracker {
       }
 
       log.info("Returning parsed object");
-      return trackUpdates.stream().map(
-          x -> new ShippingUpdateDTO(LocalDateTime.of(x.date(), x.time()), x.location(),
-              x.operation(), ShippingCompanies.DIRECT)).collect(
-          Collectors.toUnmodifiableSet());
-
+      return trackUpdates.stream()
+          .map(x -> new ShippingUpdateDTO(LocalDateTime.of(x.date(), x.time()),
+              x.location(),
+              x.operation(),
+              ShippingCompanies.DIRECT))
+          .collect(Collectors.toUnmodifiableSet());
     } catch (Exception e) {
       log.error("Unable to get shipping information for track id [{}]", trackId, e);
       throw new UnableToGetShippingUpdateException(e.getMessage());

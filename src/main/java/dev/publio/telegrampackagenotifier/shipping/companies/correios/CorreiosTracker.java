@@ -6,6 +6,7 @@ import dev.publio.telegrampackagenotifier.shipping.companies.ShippingCompanies;
 import dev.publio.telegrampackagenotifier.shipping.factory.ShippingCompanyTracker;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.extern.log4j.Log4j2;
@@ -40,21 +41,29 @@ public class CorreiosTracker implements ShippingCompanyTracker {
           .filter(x -> x.size() >= 3)
           .map(x -> x.stream().map(y -> y.substring(y.indexOf(":") + 2))
               .collect(Collectors.toList()))
-          .map(x -> x.stream().map(y -> y.replaceFirst("Agência dos Correios - ", ""))
-              .collect(Collectors.toList()))
-          .map(x -> x.stream().map(y -> y.replaceFirst(" - por favor aguarde", ""))
-              .collect(Collectors.toList()))
-          .map(x -> x.stream().map(y -> y.replaceFirst("\\| Hora: ", ""))
-              .collect(Collectors.toList()))
           .map(x -> new ShippingUpdateDTO(
-              LocalDateTime.parse(x.get(1), DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm")),
-              x.get(2),
-              x.get(0), ShippingCompanies.CORREIOS))
+              parseShipmentLocalDateTime(x),
+              parseShipmentLocation(x),
+              parseShipmentOperation(x),
+              ShippingCompanies.CORREIOS))
           .collect(Collectors.toSet());
     } catch (Exception e) {
       log.error("Unable to get correios shipping updates for {}", trackId, e);
       throw new UnableToGetShippingUpdateException(e.getMessage());
     }
+  }
+
+  private String parseShipmentOperation(List<String> x) {
+    return x.get(0).replaceFirst(" - por favor aguarde", "");
+  }
+
+  private LocalDateTime parseShipmentLocalDateTime(List<String> x) {
+    return LocalDateTime.parse(x.get(1).replaceFirst("\\| Hora: ", ""),
+        DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm"));
+  }
+
+  private String parseShipmentLocation(List<String> x) {
+    return x.get(2).replaceFirst("Agência dos Correios - ", "");
   }
 
   private String mountUrlWithTrackId(String trackId) {
