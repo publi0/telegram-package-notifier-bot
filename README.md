@@ -19,9 +19,11 @@ Receve information about your packages with this telegram bot!
 ![image](https://user-images.githubusercontent.com/14155185/144717186-911529e5-dca9-4c6c-bfbd-b5c1b3d392a9.png)
 
 4. My Packages
+
 ![image](https://user-images.githubusercontent.com/14155185/144717219-cd5e51ca-53b4-44af-b51c-8134d8a6f951.png)
 
 5. Package Info
+
 ![image](https://user-images.githubusercontent.com/14155185/144717229-6e60b2f1-a287-4d97-9860-eaacaa14298a.png)
 
 ## Stack 
@@ -43,21 +45,29 @@ Receve information about your packages with this telegram bot!
 - Companies are structured in a Strategy model
 
 ![image](https://user-images.githubusercontent.com/14155185/144717409-1c6f3c2c-7b8b-462d-946d-53363eeee3b6.png)
+
 Shipping Company interface 
 
 ![image](https://user-images.githubusercontent.com/14155185/144717432-f0c58b91-67cf-474c-afc2-3f67e5abd8de.png)
+
 Factory for finding correct shippiment company
 
 ![image](https://user-images.githubusercontent.com/14155185/144717455-1f9d0d8a-7caa-460f-a9cd-a70b320aad49.png)
+
 Example of usage
 
 ### How to add a new company?
 
 1. Implement this interface 
- ![image](https://user-images.githubusercontent.com/14155185/144717475-b0664a18-89a2-4470-9b71-f34c8ba1de16.png)
+
+![image](https://user-images.githubusercontent.com/14155185/144717475-b0664a18-89a2-4470-9b71-f34c8ba1de16.png)
+
 2. Create a enum for the company
- ![image](https://user-images.githubusercontent.com/14155185/144717488-f06c4888-18ae-42ec-beef-81a8a2dc3694.png)
+
+![image](https://user-images.githubusercontent.com/14155185/144717488-f06c4888-18ae-42ec-beef-81a8a2dc3694.png)
+
 3. If you need to add some variables this is the place
+
 ![image](https://user-images.githubusercontent.com/14155185/144717512-1cbb0836-74d2-4094-b426-cfb45a36b172.png)
 
 Its done! You have a new company!
