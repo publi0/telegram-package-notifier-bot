@@ -2,6 +2,7 @@ transporter:
   urls:
     direct_log: https://corporativo.directlog.com.br/track_individual/index.asp?numtracking=%s
     correios: https://www.linkcorreios.com.br/?id=%s
+    madeira_madeira: https://eagle.madeiramadeira.com.br/tracking/mm/eventos?%s
 
 spring:
   rabbitmq:
