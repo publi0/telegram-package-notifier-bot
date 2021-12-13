@@ -226,7 +226,7 @@ public class ProcessMessageTelegram {
               .callbackData(DELETE + activePackage.getId())
       );
       messageList.add(new SendMessage(id, buildPackageInfoMessage(activePackage))
-          .replyMarkup(inlineKeyboardMarkup).parseMode(ParseMode.MarkdownV2));
+          .replyMarkup(inlineKeyboardMarkup).parseMode(ParseMode.Markdown));
     }
   }
 }

@@ -20,6 +20,9 @@ import org.springframework.stereotype.Component;
 @Component
 public class MadeiraMadeiraTracker implements ShippingCompanyTracker {
 
+  public static final int ORDER = 0;
+  public static final int TRACKER = 1;
+
   @Value("${transporter.urls.madeira_madeira}")
   private String madeiraMadeiraUrl;
 
@@ -36,6 +39,7 @@ public class MadeiraMadeiraTracker implements ShippingCompanyTracker {
 
   @Override
   public Set<ShippingUpdateDTO> getShippingUpdate(String trackId) {
+    log.info("Getting shipping update for madeira madeira with track id {}", trackId);
     try {
       final var response = HttpClient.newBuilder()
           .build()
@@ -49,15 +53,19 @@ public class MadeiraMadeiraTracker implements ShippingCompanyTracker {
               x -> new ShippingUpdateDTO(x.date(), x.origem(), x.description(),
                   ShippingCompanies.MADEIRA_MADEIRA))
           .collect(Collectors.toUnmodifiableSet());
+    } catch (ArrayIndexOutOfBoundsException e) {
+      log.error("Unable to get shipping update for madeira madeira with track id {}", trackId);
+      throw new UnableToGetShippingUpdateException("Invalid track id " + trackId);
     } catch (Exception e) {
-      e.printStackTrace();
+      log.error("Unable to get shipping update for madeira madeira with track id {}", trackId, e);
       throw new UnableToGetShippingUpdateException(e.getMessage());
     }
   }
 
   private String mountUrlWithTrackId(String trackId) {
-    log.info("Mounting correios url with track id {}", trackId);
-    return String.format(madeiraMadeiraUrl, trackId);
+    log.info("Mounting madeira madeira url with track id {}", trackId);
+    final var trackIdAndOrder = trackId.split("-");
+    return String.format(madeiraMadeiraUrl, trackIdAndOrder[ORDER], trackIdAndOrder[TRACKER]);
   }
 
 }
