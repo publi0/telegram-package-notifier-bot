@@ -5,8 +5,8 @@ import dev.publio.telegrampackagenotifier.dto.ShippingUpdateDTO;
 import dev.publio.telegrampackagenotifier.exceptions.NoUpdatesFoundException;
 import dev.publio.telegrampackagenotifier.models.Package;
 import dev.publio.telegrampackagenotifier.models.ShippingUpdate;
-import dev.publio.telegrampackagenotifier.service.QueueService;
 import dev.publio.telegrampackagenotifier.service.TrackingService;
+import dev.publio.telegrampackagenotifier.telegram.UserNotifierTelegram;
 import java.time.LocalDateTime;
 import java.util.Comparator;
 import java.util.Optional;
@@ -21,16 +21,16 @@ import org.springframework.stereotype.Component;
 public class ShippingTrackerUpdate {
 
   private final TrackingService trackingService;
-  private final QueueService queueService;
+  private final UserNotifierTelegram queueService;
 
   public ShippingTrackerUpdate(
       TrackingService trackingService,
-      QueueService queueService) {
+      UserNotifierTelegram queueService) {
     this.trackingService = trackingService;
     this.queueService = queueService;
   }
 
-  @Scheduled(fixedDelay = 5, timeUnit = java.util.concurrent.TimeUnit.MINUTES)
+  @Scheduled(fixedDelay = 1, timeUnit = java.util.concurrent.TimeUnit.MINUTES)
   public void updateTrackers() {
     log.info("Updating trackers");
     Set<Package> allActivePackages = trackingService.getAllActivePackages();
@@ -61,7 +61,7 @@ public class ShippingTrackerUpdate {
       } else {
         log.info("New updates for package {}", activePackage.getTrackId());
         activePackage.getUpdates().add(lastUpdate.toShippingUpdate());
-        queueService.sendToTelegramNotification(new QueueTelegramMessage(
+        queueService.notify(new QueueTelegramMessage(
             activePackage.getTrackId(), activePackage.getUser(), lastUpdate));
       }
       activePackage.setLastUpdate(LocalDateTime.now());

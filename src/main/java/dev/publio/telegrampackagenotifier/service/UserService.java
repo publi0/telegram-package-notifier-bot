@@ -1,9 +1,9 @@
 package dev.publio.telegrampackagenotifier.service;
 
+import dev.publio.telegrampackagenotifier.exceptions.UsernameNotFoundException;
 import dev.publio.telegrampackagenotifier.models.User;
 import dev.publio.telegrampackagenotifier.repository.UserRepository;
 import lombok.extern.log4j.Log4j2;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 @Log4j2
