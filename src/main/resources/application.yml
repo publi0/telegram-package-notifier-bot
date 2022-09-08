@@ -5,23 +5,9 @@ transporter:
     madeira_madeira: https://eagle.madeiramadeira.com.br/tracking/mm/eventos?order=%s&collect=%s
 
 spring:
-  rabbitmq:
-    addresses: ${RABBIT_URL}
   data:
     mongodb:
       uri: ${MONGO_URL}
-  security:
-    oauth2:
-      resourceserver:
-        jwt:
-          issuer-uri: ${ISSUER_URL}
-
-auth0:
-  audience: ${AUDIENCE_URL}
-
-queue:
-  name: telegram-notification
-
 telegram:
   bot:
     token: ${TELEGRAM_BOT_TOKEN}
